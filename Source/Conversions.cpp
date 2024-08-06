@@ -6,8 +6,6 @@
 #include "Conversion_generated.h"
 
 #include <glm/glm.hpp>
-#include <stb_image.h>
-#include <stb_image_write.h>
 
 namespace nos::mediaio
 {
