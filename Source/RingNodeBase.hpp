@@ -283,6 +283,7 @@ struct RingNodeBase : NodeContext
 				output = vkss::DeserializeTextureInfo(outputTextureDesc);
 			}
 		}
+		if (Type == RingType::DOWNLOAD_RING)
 		if (slot->Params.WaitEvent)
 		{
 			nos::util::Stopwatch sw;
@@ -291,14 +292,14 @@ struct RingNodeBase : NodeContext
 			nosEngine.WatchLog((GetName() + " Copy From GPU Wait: " + NodeName.AsString()).c_str(),
 				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
+		if (Type == RingType::COPY_RING)
+		{
 		nosCmd cmd;
 		nosCmdBeginParams beginParams;
 		if constexpr (std::is_same_v<T, nosTextureInfo>)
-			beginParams = { NOS_NAME("BoundedTextureQueue: Slot Copy To Output Texture"), NodeId, & cmd };
+				beginParams = { NOS_NAME("BoundedTextureQueue: Slot Copy To Output Texture"), NodeId, &cmd };
 		else if constexpr (std::is_same_v<T, nosBufferInfo>)
-			beginParams = { NOS_NAME("BufferRing: Ring Slot Copy To Output Buffer"), NodeId, & cmd };
-		if (Type == RingType::COPY_RING)
-		{
+				beginParams = { NOS_NAME("BufferRing: Ring Slot Copy To Output Buffer"), NodeId, &cmd };
 			nosVulkan->Begin2(&beginParams);
 			nosVulkan->Copy(cmd, &slot->Res, &output, 0);
 			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &slot->Params.WaitEvent };
