@@ -284,21 +284,21 @@ struct RingNodeBase : NodeContext
 			}
 		}
 		if (Type == RingType::DOWNLOAD_RING)
-		if (slot->Params.WaitEvent)
-		{
-			nos::util::Stopwatch sw;
-			nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, UINT64_MAX);
-			auto elapsed = sw.Elapsed();
-			nosEngine.WatchLog((GetName() + " Copy From GPU Wait: " + NodeName.AsString()).c_str(),
-				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
-		}
+			if (slot->Params.WaitEvent)
+			{
+				nos::util::Stopwatch sw;
+				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, UINT64_MAX);
+				auto elapsed = sw.Elapsed();
+				nosEngine.WatchLog((GetName() + " Copy From GPU Wait: " + NodeName.AsString()).c_str(),
+					nos::util::Stopwatch::ElapsedString(elapsed).c_str());
+			}
 		if (Type == RingType::COPY_RING)
 		{
-		nosCmd cmd;
-		nosCmdBeginParams beginParams;
-		if constexpr (std::is_same_v<T, nosTextureInfo>)
+			nosCmd cmd;
+			nosCmdBeginParams beginParams;
+			if constexpr (std::is_same_v<T, nosTextureInfo>)
 				beginParams = { NOS_NAME("BoundedTextureQueue: Slot Copy To Output Texture"), NodeId, &cmd };
-		else if constexpr (std::is_same_v<T, nosBufferInfo>)
+			else if constexpr (std::is_same_v<T, nosBufferInfo>)
 				beginParams = { NOS_NAME("BufferRing: Ring Slot Copy To Output Buffer"), NodeId, &cmd };
 			nosVulkan->Begin2(&beginParams);
 			nosVulkan->Copy(cmd, &slot->Res, &output, 0);
@@ -334,10 +334,8 @@ struct RingNodeBase : NodeContext
 		if (Type == RingType::DOWNLOAD_RING)
 			LastPopped = slot;
 		else if (Type == RingType::COPY_RING)
-		{
 			Ring->EndPop(slot);
-			SendScheduleRequest(1);
-		}
+		SendScheduleRequest(1);
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -412,7 +410,6 @@ struct RingNodeBase : NodeContext
 				return;
 			Ring->EndPop(LastPopped);
 			LastPopped = nullptr;
-			SendScheduleRequest(1);
 		}
 	}
 
