@@ -224,9 +224,9 @@
           "display_name": "Use Narrow Range Encoding",
           "type_name": "bool",
           "show_as": "INPUT_PIN",
-          "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          "can_show_as": "INPUT_PIN_OR_PROPERTY",
+          "data": true
         }
-
       ]
     },
     {
