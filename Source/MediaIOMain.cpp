@@ -7,8 +7,8 @@
 
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(0);
-NOS_VULKAN_INIT();
+NOS_INIT()
+NOS_VULKAN_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
@@ -79,18 +79,18 @@ struct MediaIOPluginFunctions : nos::PluginFunctions
 			default:
 				break;
 				GEN_CASE_NODE(Interlace)
-					GEN_CASE_NODE(Deinterlace)
-					GEN_CASE_NODE(RGB2YCbCr)
-					GEN_CASE_NODE(YCbCr2RGB)
-					GEN_CASE_NODE(YUVBufferSizeCalculator)
-					GEN_CASE_NODE(GammaLUT)
-					GEN_CASE_NODE(ColorSpaceMatrix)
-					GEN_CASE_NODE(BufferRing)
-					GEN_CASE_NODE(BoundedTextureQueue)
-					GEN_CASE_NODE(UploadBufferProvider)
-					GEN_CASE_NODE(YUY2ToRGBA)
-					GEN_CASE_NODE(TextureFormatConverter)
-					GEN_CASE_NODE(NV12ToRGBA)
+				GEN_CASE_NODE(Deinterlace)
+				GEN_CASE_NODE(RGB2YCbCr)
+				GEN_CASE_NODE(YCbCr2RGB)
+				GEN_CASE_NODE(YUVBufferSizeCalculator)
+				GEN_CASE_NODE(GammaLUT)
+				GEN_CASE_NODE(ColorSpaceMatrix)
+				GEN_CASE_NODE(BufferRing)
+				GEN_CASE_NODE(BoundedTextureQueue)
+				GEN_CASE_NODE(UploadBufferProvider)
+				GEN_CASE_NODE(YUY2ToRGBA)
+				GEN_CASE_NODE(TextureFormatConverter)
+				GEN_CASE_NODE(NV12ToRGBA)
 			}
 		}
 		return NOS_RESULT_SUCCESS;
