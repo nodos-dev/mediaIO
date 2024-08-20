@@ -129,11 +129,11 @@ struct RingNodeBase : NodeContext
 		nosEngine.WatchLog((NodeName.AsString() + " Total Frame Count").c_str(), std::to_string(Ring->TotalFrameCount()).c_str());
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		if (Ring->Exit || Ring->Size == 0)
 			return NOS_RESULT_FAILED;
-		NodeExecuteArgs pins(args);
+		NodeExecuteParams pins(params);
 
 		//TODO: AJA spare count
 		//SpareCount = *pins.GetPinData<uint32_t>(NSN_Spare);
@@ -192,7 +192,7 @@ struct RingNodeBase : NodeContext
 			slot->Res.Info.Buffer.FieldType = incomingField;
 		else if constexpr (std::is_same_v<T, nosTextureInfo>)
 			slot->Res.Info.Texture.FieldType = incomingField;
-		slot->FrameNumber = args->FrameNumber;
+		slot->FrameNumber = params->FrameNumber;
 		if (slot->Params.WaitEvent)
 		{
 			nos::util::Stopwatch sw;
@@ -400,7 +400,7 @@ struct RingNodeBase : NodeContext
 		Ring->Exit = false;
 	}
 
-	void OnPathExecutionFinished(nosUUID pinId, bool causedByCancel) override
+	void OnEndFrame(nosUUID pinId, bool causedByCancel) override
 	{
 		if (Type != RingType::DOWNLOAD_RING)
 			return;

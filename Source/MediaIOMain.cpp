@@ -9,6 +9,11 @@
 
 NOS_INIT_WITH_MIN_REQUIRED_MINOR(4);
 NOS_VULKAN_INIT();
+
+NOS_BEGIN_IMPORT_DEPS
+	NOS_VULKAN_IMPORT
+NOS_END_IMPORT_DEPS
+
 NOS_REGISTER_NAME(Input);
 NOS_REGISTER_NAME(Output);
 NOS_REGISTER_NAME(In);
@@ -59,10 +64,6 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     *outSize = Nodes::Count;
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
-
-	auto ret = RequestVulkanSubsystem();
-	if (ret != NOS_RESULT_SUCCESS)
-		return ret;
 
 #define GEN_CASE_NODE(name)				\
 	case Nodes::name: {					\

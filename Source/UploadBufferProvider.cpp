@@ -111,11 +111,11 @@ namespace nos::mediaio
 				});
 		}
 
-		nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+		nosResult ExecuteNode(nosNodeExecuteParams* params) override
 		{
 			if (Buffers.size() == 0)
 				return NOS_RESULT_FAILED;
-			auto execArgs = nos::NodeExecuteArgs(args);
+			auto execParams = nos::NodeExecuteParams(params);
 			auto& nextBuf = Buffers[CurrentIndex];
 			CurrentIndex = (CurrentIndex + 1) % QueueSize;
 			if (nextBuf.Event)
@@ -128,8 +128,8 @@ namespace nos::mediaio
 				nosEngine.WatchLog("UploadBufferProvider Wait", sw.ElapsedString().c_str());
 			}
 
-			nosEngine.SetPinValue(execArgs[NSN_Buffer].Id, Buffer::From(vkss::ConvertBufferInfo(nextBuf.BufferInfo)));
-			nosEngine.SetPinValue(execArgs[NSN_GPUEventRef].Id, Buffer::From(nos::sys::vulkan::GPUEventResource(nextBuf.Event)));
+			nosEngine.SetPinValue(execParams[NSN_Buffer].Id, Buffer::From(vkss::ConvertBufferInfo(nextBuf.BufferInfo)));
+			nosEngine.SetPinValue(execParams[NSN_GPUEventRef].Id, Buffer::From(nos::sys::vulkan::GPUEventResource(nextBuf.Event)));
 
 			return NOS_RESULT_SUCCESS;
 		}

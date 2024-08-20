@@ -27,7 +27,7 @@ inline void CreateStringList(nosUUID& GenUUID, nosUUID& NodeUUID, std::string na
 	nos::fb::TVisualizer vis = { .type = nos::fb::VisualizerType::COMBO_BOX, .name = name };
 	auto buf = std::vector<u8>((u8*)list.front().data(), (u8*)list.front().data() + list.front().size() + 1);
 
-	nosEngine.GenerateID(&GenUUID);
+	GenUUID = nosEngine.GenerateID();
 
 	StrListPin.push_back(nos::fb::CreatePinDirect(fbb,
 		&GenUUID,
@@ -125,10 +125,10 @@ struct TextureFormatConverter : nos::NodeContext
 		}
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto pinIds = nos::GetPinIds(args);
-		auto pinValues = nos::GetPinValues(args);
+		auto pinIds = nos::GetPinIds(params);
+		auto pinValues = nos::GetPinValues(params);
 		InputTexture = nos::vkss::DeserializeTextureInfo(pinValues[NSN_Input]);
 		auto Out = nos::vkss::DeserializeTextureInfo(pinValues[NSN_Output]);
 		//TODO: Also should be able to convert from INT texture to FLOAT textures
@@ -271,7 +271,7 @@ nosResult RegisterTextureFormatConverter(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_TextureFormatConverter, TextureFormatConverter, fn);
 
-	std::filesystem::path root = nosEngine.Context->RootFolderPath;
+	std::filesystem::path root = nosEngine.Module->RootFolderPath;
 	auto shaderPath = (root / "Shaders" / "FloatToInt.comp").generic_string();
 	nosShaderInfo2 FloatToIntShaderInfo = {
 		.Key = NSN_FloatToIntFormat,
