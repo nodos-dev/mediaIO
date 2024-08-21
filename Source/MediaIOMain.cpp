@@ -7,8 +7,13 @@
 
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(4);
-NOS_VULKAN_INIT();
+NOS_INIT()
+NOS_VULKAN_INIT()
+
+NOS_BEGIN_IMPORT_DEPS()
+	NOS_VULKAN_IMPORT()
+NOS_END_IMPORT_DEPS()
+
 NOS_REGISTER_NAME(Input);
 NOS_REGISTER_NAME(Output);
 NOS_REGISTER_NAME(In);
@@ -51,18 +56,13 @@ nosResult RegisterYUY2ToRGBA(nosNodeFunctions*);
 nosResult RegisterTextureFormatConverter(nosNodeFunctions* fn);
 nosResult RegisterNV12ToRGBA(nosNodeFunctions*);
 
-extern "C"
+struct MediaIOPluginFunctions : nos::PluginFunctions
 {
-
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
-{
-    *outSize = Nodes::Count;
-	if (!outList)
-		return NOS_RESULT_SUCCESS;
-
-	auto ret = RequestVulkanSubsystem();
-	if (ret != NOS_RESULT_SUCCESS)
-		return ret;
+	nosResult ExportNodeFunctions(size_t& outSize, nosNodeFunctions** outList) override
+	{
+		outSize = Nodes::Count;
+		if (!outList)
+			return NOS_RESULT_SUCCESS;
 
 #define GEN_CASE_NODE(name)				\
 	case Nodes::name: {					\
@@ -72,28 +72,29 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 		break;								\
 	}
 
-	for (int i = 0; i < Nodes::Count; ++i)
-	{
-		auto node = outList[i];
-		switch ((Nodes)i) {
+		for (int i = 0; i < Nodes::Count; ++i)
+		{
+			auto node = outList[i];
+			switch ((Nodes)i) {
 			default:
 				break;
-			GEN_CASE_NODE(Interlace)
-			GEN_CASE_NODE(Deinterlace)
-			GEN_CASE_NODE(RGB2YCbCr)
-			GEN_CASE_NODE(YCbCr2RGB)
-			GEN_CASE_NODE(YUVBufferSizeCalculator)
-			GEN_CASE_NODE(GammaLUT)
-			GEN_CASE_NODE(ColorSpaceMatrix)
-			GEN_CASE_NODE(BufferRing)
-			GEN_CASE_NODE(BoundedTextureQueue)
-			GEN_CASE_NODE(UploadBufferProvider)
-			GEN_CASE_NODE(YUY2ToRGBA)
-			GEN_CASE_NODE(TextureFormatConverter)
-			GEN_CASE_NODE(NV12ToRGBA)
+				GEN_CASE_NODE(Interlace)
+				GEN_CASE_NODE(Deinterlace)
+				GEN_CASE_NODE(RGB2YCbCr)
+				GEN_CASE_NODE(YCbCr2RGB)
+				GEN_CASE_NODE(YUVBufferSizeCalculator)
+				GEN_CASE_NODE(GammaLUT)
+				GEN_CASE_NODE(ColorSpaceMatrix)
+				GEN_CASE_NODE(BufferRing)
+				GEN_CASE_NODE(BoundedTextureQueue)
+				GEN_CASE_NODE(UploadBufferProvider)
+				GEN_CASE_NODE(YUY2ToRGBA)
+				GEN_CASE_NODE(TextureFormatConverter)
+				GEN_CASE_NODE(NV12ToRGBA)
+			}
 		}
+		return NOS_RESULT_SUCCESS;
 	}
-	return NOS_RESULT_SUCCESS;
-}
-}
+};
+NOS_EXPORT_PLUGIN_FUNCTIONS(MediaIOPluginFunctions)
 }

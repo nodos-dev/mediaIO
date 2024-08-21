@@ -81,15 +81,15 @@ struct RGB2YCbCrNodeContext : NodeContext
 	}
 
 	nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_EVEN;
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs execArgs(args);
-		const nosBuffer* inputPinData = execArgs[NOS_NAME_STATIC("Source")].Data;
-		const nosBuffer* outputPinData = execArgs[NOS_NAME_STATIC("Output")].Data;
-		auto* inputFieldType = InterpretPinValue<nos::sys::vulkan::FieldType>(execArgs[NOS_NAME("InputFieldType")].Data->Data);
-		auto* outputFieldType = InterpretPinValue<nos::sys::vulkan::FieldType>(execArgs[NOS_NAME("OutputFieldType")].Data->Data);
-		auto isOutInterlaced = *InterpretPinValue<bool>(execArgs[NOS_NAME("IsOutputInterlaced")].Data->Data);
-		auto fmt = *InterpretPinValue<YCbCrPixelFormat>(execArgs[NOS_NAME("PixelFormat")].Data->Data);
+		nos::NodeExecuteParams execParams(params);
+		const nosBuffer* inputPinData = execParams[NOS_NAME_STATIC("Source")].Data;
+		const nosBuffer* outputPinData = execParams[NOS_NAME_STATIC("Output")].Data;
+		auto* inputFieldType = InterpretPinValue<nos::sys::vulkan::FieldType>(execParams[NOS_NAME("InputFieldType")].Data->Data);
+		auto* outputFieldType = InterpretPinValue<nos::sys::vulkan::FieldType>(execParams[NOS_NAME("OutputFieldType")].Data->Data);
+		auto isOutInterlaced = *InterpretPinValue<bool>(execParams[NOS_NAME("IsOutputInterlaced")].Data->Data);
+		auto fmt = *InterpretPinValue<YCbCrPixelFormat>(execParams[NOS_NAME("PixelFormat")].Data->Data);
 		auto input = vkss::DeserializeTextureInfo(inputPinData->Data);
 		auto& output = *InterpretPinValue<sys::vulkan::Buffer>(outputPinData->Data);
 		*inputFieldType = (nos::sys::vulkan::FieldType)input.Info.Texture.FieldType;
@@ -126,9 +126,9 @@ struct RGB2YCbCrNodeContext : NodeContext
 			auto bufferDesc = vkss::ConvertBufferInfo(bufInfo);
 			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(bufferDesc));
 		}
-		auto* dispatchSize = execArgs.GetPinData<nosVec2u>(NOS_NAME_STATIC("DispatchSize"));
+		auto* dispatchSize = execParams.GetPinData<nosVec2u>(NOS_NAME_STATIC("DispatchSize"));
 		*dispatchSize = GetSuitableDispatchSize(*dispatchSize, yCbCrExt, fmt == YCbCrPixelFormat::V210 ? 10 : 8, isOutInterlaced);
-		return nosVulkan->ExecuteGPUNode(this, args);
+		return nosVulkan->ExecuteGPUNode(this, params);
 	}
 };
 
@@ -151,14 +151,14 @@ struct YCbCr2RGBNodeContext : NodeContext
 
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs execArgs(args);
-		auto fmt = *InterpretPinValue<YCbCrPixelFormat>(execArgs[NOS_NAME("PixelFormat")].Data->Data);
-		auto res = *InterpretPinValue<nos::fb::vec2u>(execArgs[NOS_NAME("Resolution")].Data->Data);
-		auto* outputPinData = execArgs[NOS_NAME("Output")].Data;
+		nos::NodeExecuteParams execParams(params);
+		auto fmt = *InterpretPinValue<YCbCrPixelFormat>(execParams[NOS_NAME("PixelFormat")].Data->Data);
+		auto res = *InterpretPinValue<nos::fb::vec2u>(execParams[NOS_NAME("Resolution")].Data->Data);
+		auto* outputPinData = execParams[NOS_NAME("Output")].Data;
 		auto& output = *InterpretPinValue<sys::vulkan::Texture>(outputPinData->Data);
-		auto& input = *InterpretPinValue<sys::vulkan::Buffer>(execArgs[NOS_NAME("Source")].Data->Data);
+		auto& input = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME("Source")].Data->Data);
 		bool isInterlaced = input.field_type() == sys::vulkan::FieldType::EVEN || input.field_type() == sys::vulkan::FieldType::ODD;
 		nosEngine.SetPinValueByName(NodeId, NOS_NAME("IsInterlaced"), nos::Buffer::From(isInterlaced));
 
@@ -187,9 +187,9 @@ struct YCbCr2RGBNodeContext : NodeContext
 			texDef.field_type = input.field_type();
 			nosEngine.SetPinValueByName(NodeId, NOS_NAME("Output"), Buffer::From(texDef));
 		}
-		auto* dispatchSize = execArgs.GetPinData<nosVec2u>(NOS_NAME("DispatchSize"));
+		auto* dispatchSize = execParams.GetPinData<nosVec2u>(NOS_NAME("DispatchSize"));
 		*dispatchSize = GetSuitableDispatchSize(*dispatchSize, yCbCrExt, fmt == YCbCrPixelFormat::V210 ? 10 : 8, isInterlaced);
-		return nosVulkan->ExecuteGPUNode(this, args);
+		return nosVulkan->ExecuteGPUNode(this, params);
 	}
 };
 
@@ -205,16 +205,16 @@ struct YUVBufferSizeCalculator : NodeContext
 	{
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs execArgs(args);
-		auto fmt = *InterpretPinValue<YCbCrPixelFormat>(execArgs[NOS_NAME("PixelFormat")].Data->Data);
-		auto res = *InterpretPinValue<nos::fb::vec2u>(execArgs[NOS_NAME("Resolution")].Data->Data);
-		auto isInterlaced = *InterpretPinValue<bool>(execArgs[NOS_NAME("IsInterlaced")].Data->Data);
+		nos::NodeExecuteParams execParams(params);
+		auto fmt = *InterpretPinValue<YCbCrPixelFormat>(execParams[NOS_NAME("PixelFormat")].Data->Data);
+		auto res = *InterpretPinValue<nos::fb::vec2u>(execParams[NOS_NAME("Resolution")].Data->Data);
+		auto isInterlaced = *InterpretPinValue<bool>(execParams[NOS_NAME("IsInterlaced")].Data->Data);
 		nosVec2u ext = { res.x(), res.y() };
 		nosVec2u yCbCrExt = GetYCbCrBufferResolution(ext, fmt, isInterlaced);
 		uint64_t bufSize = yCbCrExt.x * yCbCrExt.y * 4;
-		nosEngine.SetPinValue(execArgs[NOS_NAME("Output")].Id, Buffer::From(bufSize));
+		nosEngine.SetPinValue(execParams[NOS_NAME("Output")].Id, Buffer::From(bufSize));
 		return NOS_RESULT_SUCCESS;
 	}
 };
@@ -243,12 +243,12 @@ struct GammaLUTNodeContext : NodeContext
 		nosVulkan->DestroyResource(&StagingBuffer);
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs execArgs(args);
-		const nosBuffer* outputPinData = execArgs[NOS_NAME_STATIC("LUT")].Data;
-		const auto& curve = *InterpretPinValue<GammaCurve>(execArgs[NOS_NAME_STATIC("GammaCurve")].Data->Data);
-		const auto& dir = *InterpretPinValue<GammaConversionType>(execArgs[NOS_NAME_STATIC("Type")].Data->Data);
+		nos::NodeExecuteParams execParams(params);
+		const nosBuffer* outputPinData = execParams[NOS_NAME_STATIC("LUT")].Data;
+		const auto& curve = *InterpretPinValue<GammaCurve>(execParams[NOS_NAME_STATIC("GammaCurve")].Data->Data);
+		const auto& dir = *InterpretPinValue<GammaConversionType>(execParams[NOS_NAME_STATIC("Type")].Data->Data);
 		if (Curve == curve && Type == dir)
 			return NOS_RESULT_SUCCESS;
 		constexpr auto outMemoryFlags = NOS_MEMORY_FLAGS_DEVICE_MEMORY;
@@ -374,13 +374,13 @@ struct ColorSpaceMatrixNodeContext : NodeContext
 	{
 
 	}
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs execArgs(args);
-		const auto& colorSpace = *InterpretPinValue<ColorSpace>(execArgs[NOS_NAME_STATIC("ColorSpace")].Data->Data);
-		auto fmt = *InterpretPinValue<YCbCrPixelFormat>(execArgs[NOS_NAME_STATIC("PixelFormat")].Data->Data);
-		const auto& dir = *InterpretPinValue<GammaConversionType>(execArgs[NOS_NAME_STATIC("Type")].Data->Data);
-		auto narrowRange = *InterpretPinValue<bool>(execArgs[NOS_NAME_STATIC("NarrowRange")].Data->Data);
+		nos::NodeExecuteParams execParams(params);
+		const auto& colorSpace = *InterpretPinValue<ColorSpace>(execParams[NOS_NAME_STATIC("ColorSpace")].Data->Data);
+		auto fmt = *InterpretPinValue<YCbCrPixelFormat>(execParams[NOS_NAME_STATIC("PixelFormat")].Data->Data);
+		const auto& dir = *InterpretPinValue<GammaConversionType>(execParams[NOS_NAME_STATIC("Type")].Data->Data);
+		auto narrowRange = *InterpretPinValue<bool>(execParams[NOS_NAME_STATIC("NarrowRange")].Data->Data);
 		glm::mat4 matrix = GetMatrix<f64>(colorSpace, fmt == YCbCrPixelFormat::V210 ? 10 : 8, narrowRange);
 		if(dir == GammaConversionType::DECODE)
 			matrix = glm::inverse(matrix);
@@ -399,13 +399,13 @@ struct YUY2ToRGBANodeContext : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs execArgs(args);
-		auto res = *InterpretPinValue<nos::fb::vec2u>(execArgs[NOS_NAME("Resolution")].Data->Data);
-		auto* outputPinData = execArgs[NOS_NAME("Output")].Data;
+		nos::NodeExecuteParams execParams(params);
+		auto res = *InterpretPinValue<nos::fb::vec2u>(execParams[NOS_NAME("Resolution")].Data->Data);
+		auto* outputPinData = execParams[NOS_NAME("Output")].Data;
 		auto& output = *InterpretPinValue<sys::vulkan::Texture>(outputPinData->Data);
-		auto& input = *InterpretPinValue<sys::vulkan::Buffer>(execArgs[NOS_NAME("Input")].Data->Data);
+		auto& input = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME("Input")].Data->Data);
 
 		constexpr auto reqFormat = NOS_FORMAT_R8G8B8A8_UNORM;
 
@@ -426,8 +426,8 @@ struct YUY2ToRGBANodeContext : NodeContext
 			texDef = vkss::ConvertTextureInfo(tex);
 			nosEngine.SetPinValueByName(NodeId, NOS_NAME("Output"), nos::Buffer::From(texDef));
 		}
-		nosEngine.SetPinValue(execArgs[NOS_NAME("DispatchSize")].Id, nos::Buffer::From(nosVec2u(glm::ceil(res.x()/16.0f), glm::ceil(res.y()/8.0f))));
-		return nosVulkan->ExecuteGPUNode(this, args);
+		nosEngine.SetPinValue(execParams[NOS_NAME("DispatchSize")].Id, nos::Buffer::From(nosVec2u(glm::ceil(res.x()/16.0f), glm::ceil(res.y()/8.0f))));
+		return nosVulkan->ExecuteGPUNode(this, params);
 	}
 };
 
@@ -441,13 +441,13 @@ struct NV12ToRGBANodeContext : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs execArgs(args);
-		auto res = *InterpretPinValue<nos::fb::vec2u>(execArgs[NOS_NAME("Resolution")].Data->Data);
-		auto* outputPinData = execArgs[NOS_NAME("Output")].Data;
+		nos::NodeExecuteParams execParams(params);
+		auto res = *InterpretPinValue<nos::fb::vec2u>(execParams[NOS_NAME("Resolution")].Data->Data);
+		auto* outputPinData = execParams[NOS_NAME("Output")].Data;
 		auto& output = *InterpretPinValue<sys::vulkan::Texture>(outputPinData->Data);
-		auto& input = *InterpretPinValue<sys::vulkan::Buffer>(execArgs[NOS_NAME("Input")].Data->Data);
+		auto& input = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME("Input")].Data->Data);
 
 		constexpr auto reqFormat = NOS_FORMAT_R16G16B16A16_UNORM;
 
@@ -469,8 +469,8 @@ struct NV12ToRGBANodeContext : NodeContext
 			nosEngine.SetPinValueByName(NodeId, NOS_NAME("Output"), nos::Buffer::From(texDef));
 		}
 		// Work group size is 16x16, each thread processes 4x2 pixels
-		nosEngine.SetPinValue(execArgs[NOS_NAME("DispatchSize")].Id, nos::Buffer::From(nosVec2u(glm::ceil(res.x()/32.0f), glm::ceil(res.y()/16.0f))));
-		return nosVulkan->ExecuteGPUNode(this, args);
+		nosEngine.SetPinValue(execParams[NOS_NAME("DispatchSize")].Id, nos::Buffer::From(nosVec2u(glm::ceil(res.x()/32.0f), glm::ceil(res.y()/16.0f))));
+		return nosVulkan->ExecuteGPUNode(this, params);
 	}
 };
 
