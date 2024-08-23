@@ -3,7 +3,7 @@
  */
 
 #pragma once
-
+#include <condition_variable>
 
 namespace nos
 {
