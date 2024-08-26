@@ -210,7 +210,7 @@ struct RingNodeBase : NodeContext
 
 		nosVulkan->Begin2(&beginParams);
 		nosVulkan->Copy(cmd, &input, &slot->Res, 0);
-		nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &slot->Params.WaitEvent };
+		nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = Type == RingType::DOWNLOAD_RING ? &slot->Params.WaitEvent : nullptr };
 		nosVulkan->End(cmd, &end);
 		Ring->EndPush(slot);
 		if (Mode == RingMode::FILL && Ring->IsFull())
