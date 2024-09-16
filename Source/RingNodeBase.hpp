@@ -164,9 +164,13 @@ struct RingNodeBase : NodeContext
 			nosEngine.LogI("Trying to push while ring is full");
 		}
 
-		nos::util::Stopwatch sw; 
-		auto slot = Ring->BeginPush();
-		nosEngine.WatchLog((GetName() + " Begin Push").c_str(), nos::util::Stopwatch::ElapsedString(sw.Elapsed()).c_str());
+		typename TRing<T>::Resource* slot = nullptr;
+		{
+			nos::util::Stopwatch sw; 
+			ScopedProfilerEvent({ .Name = "Wait For Empty Slot" });
+			slot = Ring->BeginPush();
+			nosEngine.WatchLog((GetName() + " Begin Push").c_str(), nos::util::Stopwatch::ElapsedString(sw.Elapsed()).c_str());
+		}
 		nosTextureFieldType incomingField;
 		if constexpr (std::is_same_v<T, nosBufferInfo>)
 			incomingField = input.Info.Buffer.FieldType;
@@ -240,7 +244,12 @@ struct RingNodeBase : NodeContext
 		}
 
 		auto effectiveSpareCount = SpareCount.load(); // TODO: * (1 + u32(th->Interlaced()));
-		auto* slot = Ring->BeginPop(100);
+
+		typename TRing<T>::Resource* slot = nullptr;
+		{
+			ScopedProfilerEvent({ .Name = "Wait For Filled Slot" });
+			slot = Ring->BeginPop(100);
+		}
 		// If timeout or exit
 		if (!slot)
 			return Ring->Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
