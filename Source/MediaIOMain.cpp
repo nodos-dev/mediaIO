@@ -35,7 +35,6 @@ enum Nodes : int
 	ColorSpaceMatrix,
 	BufferRing,
 	BoundedTextureQueue,
-	UploadBufferProvider,
 	YUY2ToRGBA,
 	TextureFormatConverter,
 	NV12ToRGBA,
@@ -51,7 +50,6 @@ nosResult RegisterGammaLUT(nosNodeFunctions*);
 nosResult RegisterColorSpaceMatrix(nosNodeFunctions*);
 nosResult RegisterBufferRing(nosNodeFunctions*);
 nosResult RegisterBoundedTextureQueue(nosNodeFunctions*);
-nosResult RegisterUploadBufferProvider(nosNodeFunctions*);
 nosResult RegisterYUY2ToRGBA(nosNodeFunctions*);
 nosResult RegisterTextureFormatConverter(nosNodeFunctions* fn);
 nosResult RegisterNV12ToRGBA(nosNodeFunctions*);
@@ -87,7 +85,6 @@ struct MediaIOPluginFunctions : nos::PluginFunctions
 				GEN_CASE_NODE(ColorSpaceMatrix)
 				GEN_CASE_NODE(BufferRing)
 				GEN_CASE_NODE(BoundedTextureQueue)
-				GEN_CASE_NODE(UploadBufferProvider)
 				GEN_CASE_NODE(YUY2ToRGBA)
 				GEN_CASE_NODE(TextureFormatConverter)
 				GEN_CASE_NODE(NV12ToRGBA)

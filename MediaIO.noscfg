@@ -19,7 +19,6 @@
 		"Config/Conversions.nosdef",
 		"Config/BufferRing.nosdef",
 		"Config/BoundedTextureQueue.nosdef",
-		"Config/UploadBufferProvider.nosdef",
 		"Config/TextureFormatConverter.nosdef"
 	],
 	"custom_types": [
@@ -69,11 +68,6 @@
 			"category": "Media IO",
 			"class_name": "BufferRing",
 			"display_name": "Buffer Ring"
-		},
-		{
-			"category": "Media IO",
-			"class_name": "UploadBufferProvider",
-			"display_name": "Upload Buffer Provider"
 		},
 		{
 			"category": "Media IO",
