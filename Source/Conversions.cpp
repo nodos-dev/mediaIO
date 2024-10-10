@@ -295,6 +295,11 @@ struct GammaLUTNodeContext : NodeContext
 			return toLinear ? 
 					[](f64 c) -> f64 { c = pow(c, 0.01268331); return pow(glm::max(c - 0.8359375f, 0.) / (18.8515625  - 18.6875 * c), 6.27739463); } : 
 						[](f64 c) -> f64 { c = pow(c, 0.15930175); return pow((0.8359375 + 18.8515625 * c) / (1 + 18.6875 * c), 78.84375); };
+        case GammaCurve::SRGB:
+            return input ? [](f64 c) -> f64 { return (c <= 0.04045) ? (c / 12.92) : pow((c + 0.055) / 1.055, 2.4); }
+                        : [](f64 c) -> f64 { return (c <= 0.0031308) ? (c * 12.92) : (pow(c, 1.0/2.4) * 1.055 - 0.055); };
+        case GammaCurve::IDENTITY:
+            return [](f64 c) { return c; };
 		}
 	}
 
