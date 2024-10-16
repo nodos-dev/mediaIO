@@ -17,8 +17,6 @@
 	"node_definitions": [
 		"Config/Interlace.nosdef",
 		"Config/Conversions.nosdef",
-		"Config/BufferRing.nosdef",
-		"Config/BoundedTextureQueue.nosdef",
 		"Config/TextureFormatConverter.nosdef"
 	],
 	"custom_types": [
@@ -63,16 +61,6 @@
 			"category": "Media IO|Conversions",
 			"class_name": "ColorSpaceMatrix",
 			"display_name": "Color Space"
-		},
-		{
-			"category": "Media IO",
-			"class_name": "BufferRing",
-			"display_name": "Buffer Ring"
-		},
-		{
-			"category": "Media IO",
-			"class_name": "BoundedTextureQueue",
-			"display_name": "Bounded Texture Queue"
 		},
 		{
 			"category": "Media IO",
