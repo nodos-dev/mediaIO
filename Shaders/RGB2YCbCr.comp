@@ -43,7 +43,7 @@ void main_yuv8()
     const int   InProgressive  = int(InputFieldType == NOS_FIELD_TYPE_PROGRESSIVE);
     const bool  Interlace = (InProgressive == 1) && (OutInterlaced == 1);
     const bool  Deinterlace = (InProgressive == 0) && (OutInterlaced == 0);
-    const int   InterlaceOdd   = int(Interlace && (OutputFieldType & NOS_FIELD_TYPE_ODD) != 0);
+    const int   ReadOdd = int(!Deinterlace && OutputFieldType == NOS_FIELD_TYPE_ODD);
     const int   DeinterlaceOdd = int(Deinterlace && (InputFieldType & NOS_FIELD_TYPE_ODD) != 0);
     const ivec2 D = ivec2(gl_NumWorkGroups * gl_WorkGroupSize).xy;
     const ivec2 Q = OutputTextureSize();
@@ -57,7 +57,7 @@ void main_yuv8()
             const ivec2 ij = LocalGroupCoord + ivec2(i, j);
             if (Deinterlace && (ij.y % 2 != DeinterlaceOdd))
                 continue;
-            yuv8(ij, ij * ivec2(2, 1 + OutInterlaced) + ivec2(0, InterlaceOdd));
+            yuv8(ij, ij * ivec2(2, 1 + OutInterlaced) + ivec2(0, ReadOdd));
         }
     }
 }
@@ -90,7 +90,7 @@ void main_v210()
     const int   InProgressive  = int(InputFieldType == NOS_FIELD_TYPE_PROGRESSIVE);
     const bool  Interlace = (InProgressive == 1) && (OutInterlaced == 1);
     const bool  Deinterlace = (InProgressive == 0) && (OutInterlaced == 0);
-    const int   InterlaceOdd   = int(Interlace && (OutputFieldType & NOS_FIELD_TYPE_ODD) != 0);
+    const int   ReadOdd = int(!Deinterlace && OutputFieldType == NOS_FIELD_TYPE_ODD);
     const int   DeinterlaceOdd = int(Deinterlace && (InputFieldType & NOS_FIELD_TYPE_ODD) != 0);
     const ivec2 N             = OutputTextureSize() / ivec2(4, 1) /  ivec2(gl_NumWorkGroups * gl_WorkGroupSize).xy;
     const ivec2 LocalGroupCoord = ivec2(gl_GlobalInvocationID.xy) * N;
@@ -100,11 +100,11 @@ void main_v210()
         for(int j = 0; j < N.y; ++j)
         {
             const ivec2 ij  = LocalGroupCoord + ivec2(i, j);
-            const ivec2 src = ij * ivec2(4, 1);
-            const ivec2 dst = ij * ivec2(6, 1);
+            const ivec2 dst = ij * ivec2(4, 1);
+            const ivec2 src = ij * ivec2(6, 1);
             if (Deinterlace && (ij.y % 2 != DeinterlaceOdd))
                 continue;
-            v210(src, dst * ivec2(1, 1 + OutInterlaced) + ivec2(0, InterlaceOdd));
+            v210(dst, src * ivec2(1, 1 + OutInterlaced) + ivec2(0, ReadOdd));
         }
     }
 }
