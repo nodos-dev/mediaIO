@@ -54,8 +54,14 @@ struct RingNodeBase : NodeContext
 
 	TRing<T>::Resource* LastPopped = nullptr;
 
+	std::atomic_bool IsOutLive = false;
+
 	RingNodeBase(const nosFbNode* node, T baseInfo, RingType type, OnRestartType onRestart) : NodeContext(node), Type(type), OnRestart(onRestart)
 	{
+		if (auto* pins = node->pins())
+			for (auto* pin : *pins)
+				if (pin->name()->c_str() == NOS_NAME("Output"))
+					IsOutLive = pin->live();
 		Ring = std::make_unique<TRing<T>>(1, baseInfo);
 
 		Ring->Stop();
@@ -218,6 +224,14 @@ struct RingNodeBase : NodeContext
 			Mode = RingMode::CONSUME;
 			ModeCV.notify_all();
 		}
+
+		if (!IsOutLive)
+		{
+			flatbuffers::FlatBufferBuilder fbb;
+			HandleEvent(CreateAppEvent(fbb, nos::CreatePartialPinUpdateDirect(fbb, &PinName2Id[NOS_NAME_STATIC("Output")], 0, 0, 0, 0, nos::Action::NOP, 0, fb::ShowAs::NONE, nos::Action::SET)));
+			IsOutLive = true;
+		}
+
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -230,6 +244,8 @@ struct RingNodeBase : NodeContext
 		}
 		if (!Ring || Ring->Exit)
 			return NOS_RESULT_FAILED;
+		if (!IsOutLive)
+			return NOS_RESULT_SUCCESS;
 		SendRingStats();
 		if (Mode == RingMode::FILL)
 		{
@@ -238,7 +254,6 @@ struct RingNodeBase : NodeContext
 			if(!ModeCV.wait_for(lock, std::chrono::milliseconds(100), [this] { return Mode != RingMode::FILL; }))
 				return NOS_RESULT_PENDING;
 		}
-
 		auto effectiveSpareCount = SpareCount.load(); // TODO: * (1 + u32(th->Interlaced()));
 		auto* slot = Ring->BeginPop(100);
 		// If timeout or exit
@@ -336,6 +351,7 @@ struct RingNodeBase : NodeContext
 		else if (Type == RingType::COPY_RING)
 			Ring->EndPop(slot);
 		SendScheduleRequest(1);
+
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -402,6 +418,19 @@ struct RingNodeBase : NodeContext
 
 	void OnEndFrame(nosUUID pinId, bool causedByCancel) override
 	{
+		if (causedByCancel)
+		{
+			if (pinId != PinName2Id[NOS_NAME_STATIC("Output")])
+			{
+
+				if (IsOutLive)
+				{
+					flatbuffers::FlatBufferBuilder fbb;
+					HandleEvent(CreateAppEvent(fbb, nos::CreatePartialPinUpdateDirect(fbb, &PinName2Id[NOS_NAME_STATIC("Output")], 0, 0, 0, 0, nos::Action::NOP, 0, fb::ShowAs::NONE, nos::Action::RESET)));
+					IsOutLive = false;
+				}
+			}
+		}
 		if (Type != RingType::DOWNLOAD_RING)
 			return;
 		if (pinId == PinName2Id[NOS_NAME_STATIC("Output")])
