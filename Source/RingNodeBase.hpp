@@ -416,9 +416,9 @@ struct RingNodeBase : NodeContext
 		Ring->Exit = false;
 	}
 
-	void OnEndFrame(nosUUID pinId, bool causedByCancel) override
+	void OnEndFrame(nosUUID pinId, nosEndFrameCause cause) override
 	{
-		if (causedByCancel)
+		if (cause == NOS_END_FRAME_FAILED)
 		{
 			if (pinId != PinName2Id[NOS_NAME_STATIC("Output")])
 			{
