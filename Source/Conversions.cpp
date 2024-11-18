@@ -10,42 +10,42 @@
 namespace nos::mediaio
 {
 
-static std::set<u32> const& FindDivisors(const u32 N)
+static std::set<uint32_t> const& FindDivisors(const uint32_t N)
 {
-	static std::map<u32, std::set<u32>> Map;
+	static std::map<uint32_t, std::set<uint32_t>> Map;
 
 	auto it = Map.find(N);
 	if(it != Map.end()) 
 		return it->second;
 
-	u32 p2 = 0, p3 = 0, p5 = 0;
-	std::set<u32> D;
+	uint32_t p2 = 0, p3 = 0, p5 = 0;
+	std::set<uint32_t> D;
 
-	static std::set<u32> Empty;
+	static std::set<uint32_t> Empty;
 
 	if (N == 0)
 		return Empty;
 
-	u32 n = N;
+	uint32_t n = N;
 	while(0 == n % 2) n /= 2, p2++;
 	while(0 == n % 3) n /= 3, p3++;
 	while(0 == n % 5) n /= 5, p5++;
 
-	for(u32 i = 0; i <= p2; ++i)
-		for(u32 j = 0; j <= p3; ++j)
-			for(u32 k = 0; k <= p5; ++k)
+	for(uint32_t i = 0; i <= p2; ++i)
+		for(uint32_t j = 0; j <= p3; ++j)
+			for(uint32_t k = 0; k <= p5; ++k)
 				D.insert(pow(2, i) * pow(3, j) * pow(5, k));
 
 	static std::mutex Lock;
 	Lock.lock();
-	std::set<u32> const& re = (Map[N] = std::move(D));
+	std::set<uint32_t> const& re = (Map[N] = std::move(D));
 	Lock.unlock();
 	return re;
 }
 
 nosVec2u GetSuitableDispatchSize(nosVec2u dispatchSize, nosVec2u outSize, uint8_t bitWidth, bool interlaced)
 {
-	constexpr auto BestFit = [](i64 val, i64 res) -> u32 {
+	constexpr auto BestFit = [](int64_t val, int64_t res) -> uint32_t {
 		if (res == 0)
 			return val;
 		auto d = FindDivisors(res);
@@ -54,14 +54,14 @@ nosVec2u GetSuitableDispatchSize(nosVec2u dispatchSize, nosVec2u outSize, uint8_
 			return *it;
 		if (it == d.end())
 			return res;
-		const i64 hi = *it;
-		const i64 lo = *--it;
-		return u32(abs(val - lo) < abs(val - hi) ? lo : hi);
+		const int64_t hi = *it;
+		const int64_t lo = *--it;
+		return uint32_t(abs(val - lo) < abs(val - hi) ? lo : hi);
 	};
 
-	const u32 q = 0;//TODO: IsQuad(); ?
-	f32 x = glm::clamp<u32>(dispatchSize.x, 1, outSize.x) * (1 + q) * (.25 * bitWidth - 1);
-	f32 y = glm::clamp<u32>(dispatchSize.y, 1, outSize.y) * (1. + q) * (1 + uint8_t(interlaced));
+	const uint32_t q = 0;//TODO: IsQuad(); ?
+	float x = glm::clamp<uint32_t>(dispatchSize.x, 1, outSize.x) * (1 + q) * (.25 * bitWidth - 1);
+	float y = glm::clamp<uint32_t>(dispatchSize.y, 1, outSize.y) * (1. + q) * (1 + uint8_t(interlaced));
 
 	return nosVec2u(BestFit(x + .5, outSize.x >> (bitWidth - 5)),
 					 BestFit(y + .5, outSize.y / 9));
@@ -232,7 +232,7 @@ struct GammaLUTNodeContext : NodeContext
 	GammaLUTNodeContext(const nosFbNode* node) : NodeContext(node)
 	{
 		StagingBuffer.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
-		StagingBuffer.Info.Buffer.Size = (1 << (SSBO_SIZE)) * sizeof(u16);
+		StagingBuffer.Info.Buffer.Size = (1 << (SSBO_SIZE)) * sizeof(uint16_t);
 		StagingBuffer.Info.Buffer.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC);
 		StagingBuffer.Info.Buffer.MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE;
 		nosVulkan->CreateResource(&StagingBuffer);
@@ -265,7 +265,7 @@ struct GammaLUTNodeContext : NodeContext
 		OutputBuffer = vkss::ConvertToResourceInfo(output);
 		auto data = GetGammaLUT(dir == GammaConversionType::DECODE, curve, SSBO_SIZE);
 		auto* ptr = nosVulkan->Map(&StagingBuffer);
-		memcpy(ptr, data.data(), data.size() * sizeof(u16));
+		memcpy(ptr, data.data(), data.size() * sizeof(uint16_t));
 		nosEngine.LogI("GammaLUT: Buffer updated");
 		Curve = curve;
 		Type = dir;
@@ -276,40 +276,40 @@ struct GammaLUTNodeContext : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 	
-	static auto GetLUTFunction(bool toLinear, GammaCurve curve) -> f64 (*)(f64)
+	static auto GetLUTFunction(bool toLinear, GammaCurve curve) -> double (*)(double)
 	{
 		switch (curve)
 		{
 		case GammaCurve::REC709:
 		default:
-			return toLinear ? [](f64 c) -> f64 { return (c < 0.081) ? (c / 4.5) : pow((c + 0.099) / 1.099, 1.0 / 0.45); }
-			: [](f64 c) -> f64 { return (c < 0.018) ? (c * 4.5) : (pow(c, 0.45) * 1.099 - 0.099); };
+			return toLinear ? [](double c) -> double { return (c < 0.081) ? (c / 4.5) : pow((c + 0.099) / 1.099, 1.0 / 0.45); }
+			: [](double c) -> double { return (c < 0.018) ? (c * 4.5) : (pow(c, 0.45) * 1.099 - 0.099); };
 		case GammaCurve::HLG:
 			return toLinear
-				   ? [](f64 c)
-						 -> f64 { return (c < 0.5) ? (c * c / 3) : (exp(c / 0.17883277 - 5.61582460179) + 0.02372241); }
-			: [](f64 c) -> f64 {
+				   ? [](double c)
+						 -> double { return (c < 0.5) ? (c * c / 3) : (exp(c / 0.17883277 - 5.61582460179) + 0.02372241); }
+			: [](double c) -> double {
 				return (c < 1. / 12.) ? sqrt(c * 3) : (std::log(c - 0.02372241) * 0.17883277 + 1.00429346);
 		};
 		case GammaCurve::ST2084:
 			return toLinear ? 
-					[](f64 c) -> f64 { c = pow(c, 0.01268331); return pow(glm::max(c - 0.8359375f, 0.) / (18.8515625  - 18.6875 * c), 6.27739463); } : 
-						[](f64 c) -> f64 { c = pow(c, 0.15930175); return pow((0.8359375 + 18.8515625 * c) / (1 + 18.6875 * c), 78.84375); };
+					[](double c) -> double { c = pow(c, 0.01268331); return pow(glm::max(c - 0.8359375f, 0.) / (18.8515625  - 18.6875 * c), 6.27739463); } : 
+						[](double c) -> double { c = pow(c, 0.15930175); return pow((0.8359375 + 18.8515625 * c) / (1 + 18.6875 * c), 78.84375); };
         case GammaCurve::SRGB:
-            return toLinear ? [](f64 c) -> f64 { return (c <= 0.04045) ? (c / 12.92) : pow((c + 0.055) / 1.055, 2.4); }
-                        : [](f64 c) -> f64 { return (c <= 0.0031308) ? (c * 12.92) : (pow(c, 1.0/2.4) * 1.055 - 0.055); };
+            return toLinear ? [](double c) -> double { return (c <= 0.04045) ? (c / 12.92) : pow((c + 0.055) / 1.055, 2.4); }
+                        : [](double c) -> double { return (c <= 0.0031308) ? (c * 12.92) : (pow(c, 1.0/2.4) * 1.055 - 0.055); };
         case GammaCurve::IDENTITY:
-            return [](f64 c) { return c; };
+            return [](double c) { return c; };
 		}
 	}
 
-	static std::vector<u16> GetGammaLUT(bool toLinear, GammaCurve curve, u16 bits)
+	static std::vector<uint16_t> GetGammaLUT(bool toLinear, GammaCurve curve, uint16_t bits)
 	{
-		std::vector<u16> re(1 << bits, 0.f);
+		std::vector<uint16_t> re(1 << bits, 0.f);
 		auto fn = GetLUTFunction(toLinear, curve);
-		for (u32 i = 0; i < 1 << bits; ++i)
+		for (uint32_t i = 0; i < 1 << bits; ++i)
 		{
-			re[i] = u16(f64((1 << 16) - 1) * fn(f64(i) / f64((1 << bits) - 1)) + 0.5);
+			re[i] = uint16_t(double((1 << 16) - 1) * fn(double(i) / double((1 << bits) - 1)) + 0.5);
 		}
 		return re;
 	}
@@ -327,7 +327,7 @@ nosResult RegisterGammaLUT(nosNodeFunctions* funcs)
 
 struct ColorSpaceMatrixNodeContext : NodeContext
 {
-	static std::array<f64, 2> GetCoeffs(ColorSpace colorSpace)
+	static std::array<double, 2> GetCoeffs(ColorSpace colorSpace)
 	{
 		switch (colorSpace)
 		{
@@ -342,7 +342,7 @@ struct ColorSpaceMatrixNodeContext : NodeContext
 	}
 
 	template<class T>
-	static glm::mat<4, 4, T> GetMatrix(ColorSpace colorSpace, u32 bitWidth, bool narrowRange)
+	static glm::mat<4, 4, T> GetMatrix(ColorSpace colorSpace, uint32_t bitWidth, bool narrowRange)
 	{
 		// https://registry.khronos.org/DataFormat/specs/1.3/dataformat.1.3.html#MODEL_CONVERSION
 		const auto [R, B] = GetCoeffs(colorSpace);
@@ -386,7 +386,7 @@ struct ColorSpaceMatrixNodeContext : NodeContext
 		auto fmt = *InterpretPinValue<YCbCrPixelFormat>(execParams[NOS_NAME_STATIC("PixelFormat")].Data->Data);
 		const auto& dir = *InterpretPinValue<GammaConversionType>(execParams[NOS_NAME_STATIC("Type")].Data->Data);
 		auto narrowRange = *InterpretPinValue<bool>(execParams[NOS_NAME_STATIC("NarrowRange")].Data->Data);
-		glm::mat4 matrix = GetMatrix<f64>(colorSpace, fmt == YCbCrPixelFormat::V210 ? 10 : 8, narrowRange);
+		glm::mat4 matrix = GetMatrix<double>(colorSpace, fmt == YCbCrPixelFormat::V210 ? 10 : 8, narrowRange);
 		if(dir == GammaConversionType::DECODE)
 			matrix = glm::inverse(matrix);
 		nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(matrix));
