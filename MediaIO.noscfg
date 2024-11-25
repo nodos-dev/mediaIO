@@ -70,7 +70,8 @@
 		{
 			"category": "Media IO|Conversions",
 			"class_name": "TextureFormatConverter",
-			"display_name": "Texture Format Converter"
+			"display_name": "Texture Format Converter",
+			"name_aliases":  ["image type"]
 		},
 		{
 			"category": "Media IO",
