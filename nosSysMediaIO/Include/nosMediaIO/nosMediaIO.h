@@ -70,6 +70,11 @@ inline const char* NOS_MEDIAIO_FRAME_GEOMETRY_NAMES[] = {
 	"2560x1600",
 };
 
+typedef struct nosMediaIOFrameGeometryList {
+	size_t Count;
+	nosMediaIOFrameGeometry Geometries[NOS_MEDIAIO_FRAME_GEOMETRY_COUNT];
+} nosMediaIOFrameGeometryList;
+
 typedef enum nosMediaIOFrameRate
 {
 	NOS_MEDIAIO_FRAME_RATE_INVALID,
@@ -113,6 +118,11 @@ inline const char* NOS_MEDIAIO_FRAME_RATE_NAMES[] = {
 	"120"
 };
 
+typedef struct nosMediaIOFrameRateList {
+	size_t Count;
+	nosMediaIOFrameRate FrameRates[NOS_MEDIAIO_FRAME_RATE_COUNT];
+} nosMediaIOFrameRateList;
+
 typedef enum nosMediaIOPixelFormat
 {
 	NOS_MEDIAIO_PIXEL_FORMAT_INVALID,
@@ -129,6 +139,11 @@ inline const char* NOS_MEDIAIO_PIXEL_FORMAT_NAMES[] = {
 	"YCbCr 8-bit",
 	"YCbCr 10-bit"
 };
+
+typedef struct nosMediaIOPixelFormatList {
+	size_t Count;
+	nosMediaIOPixelFormat PixelFormats[NOS_MEDIAIO_PIXEL_FORMAT_COUNT];
+} nosMediaIOPixelFormatList;
 
 typedef struct nosMediaIOSubsystem {
 	const char* (NOSAPI_CALL* GetFrameGeometryName)(nosMediaIOFrameGeometry geometry);
