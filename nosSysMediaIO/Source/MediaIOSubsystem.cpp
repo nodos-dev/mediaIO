@@ -14,32 +14,55 @@ std::unordered_map<uint32_t, nosMediaIOSubsystem*> GExportedSubsystemVersions;
 
 const char* NOSAPI_CALL GetFrameGeometryName(nosMediaIOFrameGeometry geometry)
 {
-	switch (geometry)
-	{
-	case NOS_MEDIAIO_FG_INVALID: return "Invalid";
-	case NOS_MEDIAIO_FG_NTSC: return "NTSC";
-	case NOS_MEDIAIO_FG_PAL: return "PAL";
-	case NOS_MEDIAIO_FG_HD720: return "HD 720";
-	case NOS_MEDIAIO_FG_HD1080: return "HD 1080";
-	case NOS_MEDIAIO_FG_2K: return "2K";
-	case NOS_MEDIAIO_FG_2KDCI: return "2K DCI";
-	case NOS_MEDIAIO_FG_4K2160: return "4K 2160";
-	case NOS_MEDIAIO_FG_4KDCI: return "4K DCI";
-	case NOS_MEDIAIO_FG_8K4320: return "8K 4320";
-	case NOS_MEDIAIO_FG_8KDCI: return "8K DCI";
-	case NOS_MEDIAIO_FG_640x480: return "640x480";
-	case NOS_MEDIAIO_FG_800x600: return "800x600";
-	case NOS_MEDIAIO_FG_1440x900: return "1440x900";
-	case NOS_MEDIAIO_FG_1440x1080: return "1440x1080";
-	case NOS_MEDIAIO_FG_1600x1200: return "1600x1200";
-	case NOS_MEDIAIO_FG_1920x1200: return "1920x1200";
-	case NOS_MEDIAIO_FG_1920x1440: return "1920x1440";
-	case NOS_MEDIAIO_FG_2560x1440: return "2560x1440";
-	case NOS_MEDIAIO_FG_2560x1600: return "2560x1600";
-	}
-	return "Unknown";
+	if (geometry < NOS_MEDIAIO_FG_MIN || geometry > NOS_MEDIAIO_FG_MAX)
+		return NOS_MEDIAIO_FRAME_GEOMETRY_NAMES[NOS_MEDIAIO_FG_INVALID];
+	return NOS_MEDIAIO_FRAME_GEOMETRY_NAMES[geometry];
 }
 
+const char* NOSAPI_CALL GetFrameRateName(nosMediaIOFrameRate frameRate)
+{
+	if (frameRate < NOS_MEDIAIO_FRAME_RATE_MIN || frameRate > NOS_MEDIAIO_FRAME_RATE_MAX)
+		return NOS_MEDIAIO_FRAME_RATE_NAMES[NOS_MEDIAIO_FRAME_RATE_INVALID];
+	return NOS_MEDIAIO_FRAME_RATE_NAMES[frameRate];
+}
+
+const char* NOSAPI_CALL GetPixelFormatName(nosMediaIOPixelFormat pixelFormat)
+{
+	if (pixelFormat < NOS_MEDIAIO_PIXEL_FORMAT_MIN || pixelFormat > NOS_MEDIAIO_PIXEL_FORMAT_MAX)
+		return NOS_MEDIAIO_PIXEL_FORMAT_NAMES[NOS_MEDIAIO_PIXEL_FORMAT_INVALID];
+	return NOS_MEDIAIO_PIXEL_FORMAT_NAMES[pixelFormat];
+}
+
+nosMediaIOFrameGeometry NOSAPI_CALL GetFrameGeometryFromString(const char* str)
+{
+	for (size_t i = NOS_MEDIAIO_FG_MIN; i <= NOS_MEDIAIO_FG_MAX; ++i)
+	{
+		if (strcmp(str, NOS_MEDIAIO_FRAME_GEOMETRY_NAMES[i]) == 0)
+			return static_cast<nosMediaIOFrameGeometry>(i);
+	}
+	return NOS_MEDIAIO_FG_INVALID;
+}
+
+nosMediaIOFrameRate NOSAPI_CALL GetFrameRateFromString(const char* str)
+{
+	for (size_t i = NOS_MEDIAIO_FRAME_RATE_MIN; i <= NOS_MEDIAIO_FRAME_RATE_MAX; ++i)
+	{
+		if (strcmp(str, NOS_MEDIAIO_FRAME_RATE_NAMES[i]) == 0)
+			return static_cast<nosMediaIOFrameRate>(i);
+	}
+	return NOS_MEDIAIO_FRAME_RATE_INVALID;
+}
+
+nosMediaIOPixelFormat NOSAPI_CALL GetPixelFormatFromString(const char* str)
+{
+	for (size_t i = NOS_MEDIAIO_PIXEL_FORMAT_MIN; i <= NOS_MEDIAIO_PIXEL_FORMAT_MAX; ++i)
+	{
+		if (strcmp(str, NOS_MEDIAIO_PIXEL_FORMAT_NAMES[i]) == 0)
+			return static_cast<nosMediaIOPixelFormat>(i);
+	}
+	return NOS_MEDIAIO_PIXEL_FORMAT_INVALID;
+}
+	
 nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 {
 	auto it = GExportedSubsystemVersions.find(minorVersion);
@@ -50,6 +73,11 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 	}
 	nosMediaIOSubsystem* subsystem = new nosMediaIOSubsystem();
 	subsystem->GetFrameGeometryName = GetFrameGeometryName;
+	subsystem->GetFrameRateName = GetFrameRateName;
+	subsystem->GetPixelFormatName = GetPixelFormatName;
+	subsystem->GetFrameGeometryFromString = GetFrameGeometryFromString;
+	subsystem->GetFrameRateFromString = GetFrameRateFromString;
+	subsystem->GetPixelFormatFromString = GetPixelFormatFromString;
 	*outSubsystemContext = subsystem;
 	GExportedSubsystemVersions[minorVersion] = subsystem;
 	return NOS_RESULT_SUCCESS;

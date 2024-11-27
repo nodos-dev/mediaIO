@@ -47,6 +47,29 @@ typedef enum nosMediaIOFrameGeometry
 
 #define NOS_MEDIAIO_FRAME_GEOMETRY_COUNT (NOS_MEDIAIO_FG_MAX - NOS_MEDIAIO_FG_MIN)
 
+inline const char* NOS_MEDIAIO_FRAME_GEOMETRY_NAMES[] = {
+	"INVALID",
+	"NTSC",
+	"PAL",
+	"HD 720",
+	"HD 1080",
+	"2K",
+	"2K DCI",
+	"4K 2160",
+	"4K DCI",
+	"8K 4320",
+	"8K DCI",
+	"640x480",
+	"800x600",
+	"1440x900",
+	"1440x1080",
+	"1600x1200",
+	"1920x1200",
+	"1920x1440",
+	"2560x1440",
+	"2560x1600",
+};
+
 typedef enum nosMediaIOFrameRate
 {
 	NOS_MEDIAIO_FRAME_RATE_INVALID,
@@ -71,6 +94,25 @@ typedef enum nosMediaIOFrameRate
 
 #define NOS_MEDIAIO_FRAME_RATE_COUNT (NOS_MEDIAIO_FRAME_RATE_MAX - NOS_MEDIAIO_FRAME_RATE_MIN)
 
+inline const char* NOS_MEDIAIO_FRAME_RATE_NAMES[] = {
+	"INVALID",
+	"23.98",
+	"24",
+	"25",
+	"29.97",
+	"30",
+	"47.95",
+	"48",
+	"50",
+	"59.94",
+	"60",
+	"95.90",
+	"96",
+	"100",
+	"119.88",
+	"120"
+};
+
 typedef enum nosMediaIOPixelFormat
 {
 	NOS_MEDIAIO_PIXEL_FORMAT_INVALID,
@@ -82,10 +124,19 @@ typedef enum nosMediaIOPixelFormat
 
 #define NOS_MEDIAIO_PIXEL_FORMAT_COUNT (NOS_MEDIAIO_PIXEL_FORMAT_MAX - NOS_MEDIAIO_PIXEL_FORMAT_MIN)
 
+inline const char* NOS_MEDIAIO_PIXEL_FORMAT_NAMES[] = {
+	"INVALID",
+	"YCbCr 8-bit",
+	"YCbCr 10-bit"
+};
+
 typedef struct nosMediaIOSubsystem {
 	const char* (NOSAPI_CALL* GetFrameGeometryName)(nosMediaIOFrameGeometry geometry);
 	const char* (NOSAPI_CALL* GetFrameRateName)(nosMediaIOFrameRate frameRate);
 	const char* (NOSAPI_CALL* GetPixelFormatName)(nosMediaIOPixelFormat pixelFormat);
+	nosMediaIOFrameGeometry (NOSAPI_CALL* GetFrameGeometryFromString)(const char* str);
+	nosMediaIOFrameRate (NOSAPI_CALL* GetFrameRateFromString)(const char* str);
+	nosMediaIOPixelFormat (NOSAPI_CALL* GetPixelFormatFromString)(const char* str);
 } nosMediaIOSubsystem;
 
 #pragma region Helper Declarations & Macros
