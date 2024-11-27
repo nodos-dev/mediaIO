@@ -2,7 +2,7 @@
 
 ![build-badge](https://github.com/nodos-dev/mediaio/actions/workflows/release.yml/badge.svg)
 
-This folder contains the Nodos plugin for media I/O workflows. It delivers the core functionality for other video I/O devices such as AJA, Bluefish, webcam and other future video development.
+This folder contains the Nodos plugin & subsystem for media I/O workflows. It delivers the core functionality for other video I/O devices such as AJA, Bluefish, webcam and other future video development.
 
 ## What functionality does MediaIO deliver?
 1. **Gamma conversions:** Gamma node creates 1D LUTs (Lookup Tables) for Gamma_Encoded->linear and linear->Gamma_Encoded conversions.

@@ -1,5 +1,7 @@
 namespace nos.mediaio;
 
+// TODO: Move to nos.sys.mediaio
+
 enum ColorSpace : uint {
     REC709  = 0,
     REC601  = 1,

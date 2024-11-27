@@ -1,0 +1,18 @@
+{
+	"info": {
+		"id": {
+			"name": "nos.sys.mediaio",
+			"version": "1.0.0"
+		},
+		"description": "Subsystem for Media I/O workflows.",
+		"display_name": "Media I/O",
+		"dependencies": [
+		],
+        "category": "Media I/O"
+	},
+	"custom_types": [
+	],
+	"named_values": [
+	],
+	"binary_path": "Binaries/nosSysMediaIO"
+}
