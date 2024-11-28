@@ -152,6 +152,8 @@ typedef struct nosMediaIOSubsystem {
 	nosMediaIOFrameGeometry (NOSAPI_CALL* GetFrameGeometryFromString)(const char* str);
 	nosMediaIOFrameRate (NOSAPI_CALL* GetFrameRateFromString)(const char* str);
 	nosMediaIOPixelFormat (NOSAPI_CALL* GetPixelFormatFromString)(const char* str);
+	nosResult (NOSAPI_CALL* GetFrameRateDeltaSeconds)(nosMediaIOFrameRate frameRate, nosVec2u* outDeltaSeconds);
+	nosResult (NOSAPI_CALL* Get2DFrameResolution)(nosMediaIOFrameGeometry geometry, nosVec2u* outResolution);
 } nosMediaIOSubsystem;
 
 #pragma region Helper Declarations & Macros
