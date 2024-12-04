@@ -397,6 +397,11 @@ struct RingNodeBase : NodeContext
 	{
 		if (Ring && OnRestart == OnRestartType::RESET)
 			Ring->Reset(false);
+		if (Ring && OnRestart == OnRestartType::WAIT_UNTIL_FULL && Ring->IsFull())
+		{
+			Ring->Write.Pool.push_back(Ring->Read.Pool.front());
+			Ring->Read.Pool.pop_front();
+		}
 		if (RequestedRingSize)
 		{
 			Ring->Resize(*RequestedRingSize);
@@ -411,8 +416,6 @@ struct RingNodeBase : NodeContext
 		auto emptySlotCount = Ring->Write.Pool.size();
 		nosScheduleNodeParams schedule{ .NodeId = NodeId, .AddScheduleCount = emptySlotCount };
 		nosEngine.ScheduleNode(&schedule);
-		if (emptySlotCount == 0)
-			Mode = RingMode::CONSUME;
 		Ring->Exit = false;
 	}
 
