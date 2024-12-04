@@ -36,6 +36,7 @@ enum Nodes : int
 	YUY2ToRGBA,
 	TextureFormatConverter,
 	NV12ToRGBA,
+	RGBAToRGB24Buffer,
 	Count
 };
 
@@ -49,6 +50,7 @@ nosResult RegisterColorSpaceMatrix(nosNodeFunctions*);
 nosResult RegisterYUY2ToRGBA(nosNodeFunctions*);
 nosResult RegisterTextureFormatConverter(nosNodeFunctions* fn);
 nosResult RegisterNV12ToRGBA(nosNodeFunctions*);
+nosResult RegisterRGBAToRGB24Buffer(nosNodeFunctions*);
 
 struct MediaIOPluginFunctions : nos::PluginFunctions
 {
@@ -82,6 +84,7 @@ struct MediaIOPluginFunctions : nos::PluginFunctions
 				GEN_CASE_NODE(YUY2ToRGBA)
 				GEN_CASE_NODE(TextureFormatConverter)
 				GEN_CASE_NODE(NV12ToRGBA)
+				GEN_CASE_NODE(RGBAToRGB24Buffer)
 			}
 		}
 		return NOS_RESULT_SUCCESS;

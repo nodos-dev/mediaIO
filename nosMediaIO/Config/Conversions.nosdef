@@ -357,6 +357,41 @@
           }
         }
       ]
+    },
+    {
+      "class_name": "RGBAToRGB24Buffer",
+      "contents_type": "Job",
+      "contents": {
+        "type": "nos.sys.vulkan.GPUNode",
+        "options": {
+          "shader": "Shaders/RGBAToRGB24.comp",
+          "stage": "COMPUTE"
+        }
+      },
+      "pins": [
+        {
+          "name": "Source",
+          "type_name": "nos.sys.vulkan.Texture",
+          "show_as": "INPUT_PIN",
+          "can_show_as": "INPUT_PIN_ONLY"
+        },
+        {
+          "name": "DispatchSize",
+          "type_name": "nos.fb.vec2u",
+          "show_as": "PROPERTY",
+          "can_show_as": "PROPERTY_ONLY",
+          "data": {
+            "x": 120,
+            "y": 120
+          }
+        },
+        {
+          "name": "Output",
+          "type_name": "nos.sys.vulkan.Buffer",
+          "show_as": "OUTPUT_PIN",
+          "can_show_as": "OUTPUT_PIN_ONLY"
+        }
+      ]
     }
   ]
 }

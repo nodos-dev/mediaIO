@@ -77,6 +77,12 @@
 			"category": "Media IO",
 			"class_name": "NV12ToRGBA",
 			"display_name": "NV12 To RGBA Converter"
+		},
+		{
+			"category": "Media IO",
+			"class_name": "RGBAToRGB24Buffer",
+			"display_name": "RGBA To RGB24 Buffer Converter",
+			"name_aliases": [ "virtual camera format", "R8G8B8", "RGB8" ]
 		}
 	],
 	"subsystem_options": [
