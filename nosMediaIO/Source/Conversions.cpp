@@ -485,9 +485,9 @@ nosResult RegisterNV12ToRGBA(nosNodeFunctions* funcs)
 	return NOS_RESULT_SUCCESS;
 }
 
-struct RGBA2RGB24BufferNodeContext : NodeContext
+struct RGBA2BGR24BufferNodeContext : NodeContext
 {
-	RGBA2RGB24BufferNodeContext(const nosFbNode* node) : NodeContext(node)
+	RGBA2BGR24BufferNodeContext(const nosFbNode* node) : NodeContext(node)
 	{
 	}
 
@@ -524,9 +524,9 @@ struct RGBA2RGB24BufferNodeContext : NodeContext
 	}
 };
 
-nosResult RegisterRGBAToRGB24Buffer(nosNodeFunctions* funcs)
+nosResult RegisterRGBAToBGR24Buffer(nosNodeFunctions* funcs)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.mediaio.RGBAToRGB24Buffer"), RGBA2RGB24BufferNodeContext, funcs);
+	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.mediaio.RGBAToBGR24Buffer"), RGBA2BGR24BufferNodeContext, funcs);
 	return NOS_RESULT_SUCCESS;
 }
 

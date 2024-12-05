@@ -11,14 +11,14 @@ layout (binding = 1) writeonly buffer OutputBuffer
 } Output;
 
 uvec3 fetchPixel(uint x, uint y){
-    vec4 color = texelFetch(Source, ivec2(x,y), 0);
+    vec4 color = pow(texelFetch(Source, ivec2(x,y), 0), vec4(1/2.2f));
 	
     vec3 clamped = clamp(color.rgb, vec3(0.0f), vec3(1.0f));
     // Convert color channels to byte values
     uint r = uint(clamped.r * 255.0f);
     uint g = uint(clamped.g * 255.0f);
     uint b = uint(clamped.b * 255.0f);
-    return uvec3(r, g, b);
+    return uvec3(b, g, r);
 }
 
 void main() {
@@ -63,6 +63,9 @@ void main() {
 	Output.Pixels[wordIndex + 1] = values[1];
 	Output.Pixels[wordIndex + 2] = values[2];
 }
+
+
+
 
 
 

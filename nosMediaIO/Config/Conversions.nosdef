@@ -359,12 +359,12 @@
       ]
     },
     {
-      "class_name": "RGBAToRGB24Buffer",
+      "class_name": "RGBAToBGR24Buffer",
       "contents_type": "Job",
       "contents": {
         "type": "nos.sys.vulkan.GPUNode",
         "options": {
-          "shader": "Shaders/RGBAToRGB24.comp",
+          "shader": "Shaders/RGBAToBGR24.comp",
           "stage": "COMPUTE"
         }
       },

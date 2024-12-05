@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.mediaio",
-			"version": "2.0.0"
+			"version": "2.1.0"
 		},
 		"description": "Media I/O nodes.",
 		"display_name": "Media I/O",
@@ -80,9 +80,9 @@
 		},
 		{
 			"category": "Media IO",
-			"class_name": "RGBAToRGB24Buffer",
-			"display_name": "RGBA To RGB24 Buffer Converter",
-			"name_aliases": [ "virtual camera format", "R8G8B8", "RGB8" ]
+			"class_name": "RGBAToBGR24Buffer",
+			"display_name": "RGBA To BGR24 Buffer Converter",
+			"name_aliases": [ "virtual camera format", "B8G8R8", "BGR8", "RGB24", "RGB8" ]
 		}
 	],
 	"subsystem_options": [
