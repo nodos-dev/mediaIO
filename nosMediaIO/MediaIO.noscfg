@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.mediaio",
-			"version": "2.1.0"
+			"version": "2.2.0"
 		},
 		"description": "Media I/O nodes.",
 		"display_name": "Media I/O",
@@ -17,7 +17,8 @@
 	"node_definitions": [
 		"Config/Interlace.nosdef",
 		"Config/Conversions.nosdef",
-		"Config/TextureFormatConverter.nosdef"
+		"Config/TextureFormatConverter.nosdef",
+		"Config/IsInterlaced.nosdef"
 	],
 	"custom_types": [
 		"Config/Conversion.fbs"
@@ -83,6 +84,11 @@
 			"class_name": "RGBAToBGR24Buffer",
 			"display_name": "RGBA To BGR24 Buffer Converter",
 			"name_aliases": [ "virtual camera format", "B8G8R8", "BGR8", "RGB24", "RGB8" ]
+		},
+		{
+			"category": "Media IO",
+			"class_name": "IsInterlaced",
+			"display_name": "Is Interlaced"
 		}
 	],
 	"subsystem_options": [

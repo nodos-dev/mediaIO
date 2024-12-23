@@ -33,6 +33,13 @@ const char* NOSAPI_CALL GetPixelFormatName(nosMediaIOPixelFormat pixelFormat)
 	return NOS_MEDIAIO_PIXEL_FORMAT_NAMES[pixelFormat];
 }
 
+const char* NOSAPI_CALL GetVideoScanTypeName(nosMediaIOVideoScanType scanType)
+{
+	if (scanType < NOS_MEDIAIO_VIDEO_SCAN_TYPE_MIN || scanType > NOS_MEDIAIO_VIDEO_SCAN_TYPE_MAX)
+		return NOS_MEDIAIO_VIDEO_SCAN_TYPE_NAMES[NOS_MEDIAIO_VIDEO_SCAN_TYPE_INVALID];
+	return NOS_MEDIAIO_VIDEO_SCAN_TYPE_NAMES[scanType];
+}
+
 nosMediaIOFrameGeometry NOSAPI_CALL GetFrameGeometryFromString(const char* str)
 {
 	for (size_t i = NOS_MEDIAIO_FRAME_GEOMETRY_MIN; i <= NOS_MEDIAIO_FRAME_GEOMETRY_MAX; ++i)
@@ -61,6 +68,16 @@ nosMediaIOPixelFormat NOSAPI_CALL GetPixelFormatFromString(const char* str)
 			return static_cast<nosMediaIOPixelFormat>(i);
 	}
 	return NOS_MEDIAIO_PIXEL_FORMAT_INVALID;
+}
+
+nosMediaIOVideoScanType NOSAPI_CALL GetVideoScanTypeFromString(const char* str)
+{
+	for (size_t i = NOS_MEDIAIO_VIDEO_SCAN_TYPE_MIN; i <= NOS_MEDIAIO_VIDEO_SCAN_TYPE_MAX; ++i)
+	{
+		if (strcmp(str, NOS_MEDIAIO_VIDEO_SCAN_TYPE_NAMES[i]) == 0)
+			return static_cast<nosMediaIOVideoScanType>(i);
+	}
+	return NOS_MEDIAIO_VIDEO_SCAN_TYPE_INVALID;
 }
 	
 // Function implementation
@@ -150,6 +167,8 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 	subsystem->GetPixelFormatFromString = GetPixelFormatFromString;
 	subsystem->GetFrameRateDeltaSeconds = GetFrameRateDeltaSeconds;
 	subsystem->Get2DFrameResolution = Get2DFrameResolution;
+	subsystem->GetVideoScanTypeName = GetVideoScanTypeName;
+	subsystem->GetVideoScanTypeFromString = GetVideoScanTypeFromString;
 	*outSubsystemContext = subsystem;
 	GExportedSubsystemVersions[minorVersion] = subsystem;
 	return NOS_RESULT_SUCCESS;

@@ -145,6 +145,26 @@ typedef struct nosMediaIOPixelFormatList {
 	nosMediaIOPixelFormat PixelFormats[NOS_MEDIAIO_PIXEL_FORMAT_COUNT];
 } nosMediaIOPixelFormatList;
 
+typedef enum nosMediaIOVideoScanType
+{
+	NOS_MEDIAIO_VIDEO_SCAN_TYPE_INVALID,
+	NOS_MEDIAIO_VIDEO_SCAN_TYPE_MIN = NOS_MEDIAIO_VIDEO_SCAN_TYPE_INVALID,
+	NOS_MEDIAIO_VIDEO_PROGRESSIVE_SCAN,
+	NOS_MEDIAIO_VIDEO_INTERLACED_SCAN,
+	NOS_MEDIAIO_VIDEO_SCAN_TYPE_MAX = NOS_MEDIAIO_VIDEO_INTERLACED_SCAN
+} nosMediaIOVideoScanType;
+
+inline const char* NOS_MEDIAIO_VIDEO_SCAN_TYPE_NAMES[] = {
+	"INVALID",
+	"Progressive",
+	"Interlaced"
+};
+
+typedef struct nosMediaIOVideoScanTypeList {
+	size_t Count;
+	nosMediaIOVideoScanType ScanTypes[2];
+} nosMediaIOVideoScanTypeList;
+
 typedef struct nosMediaIOSubsystem {
 	const char* (NOSAPI_CALL* GetFrameGeometryName)(nosMediaIOFrameGeometry geometry);
 	const char* (NOSAPI_CALL* GetFrameRateName)(nosMediaIOFrameRate frameRate);
@@ -154,6 +174,8 @@ typedef struct nosMediaIOSubsystem {
 	nosMediaIOPixelFormat (NOSAPI_CALL* GetPixelFormatFromString)(const char* str);
 	nosResult (NOSAPI_CALL* GetFrameRateDeltaSeconds)(nosMediaIOFrameRate frameRate, nosVec2u* outDeltaSeconds);
 	nosResult (NOSAPI_CALL* Get2DFrameResolution)(nosMediaIOFrameGeometry geometry, nosVec2u* outResolution);
+	const char* (NOSAPI_CALL* GetVideoScanTypeName)(nosMediaIOVideoScanType scanType);
+	nosMediaIOVideoScanType (NOSAPI_CALL* GetVideoScanTypeFromString)(const char* str);
 } nosMediaIOSubsystem;
 
 #pragma region Helper Declarations & Macros
@@ -161,7 +183,7 @@ typedef struct nosMediaIOSubsystem {
 // Make sure these are same with nossys file.
 #define NOS_MEDIAIO_SUBSYSTEM_NAME "nos.sys.mediaio"
 #define NOS_MEDIAIO_SUBSYSTEM_VERSION_MAJOR 0
-#define NOS_MEDIAIO_SUBSYSTEM_VERSION_MINOR 1
+#define NOS_MEDIAIO_SUBSYSTEM_VERSION_MINOR 2
 
 extern struct nosModuleInfo nosMediaIOSubsystemModuleInfo;
 extern nosMediaIOSubsystem* nosMediaIO;
