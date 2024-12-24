@@ -20,7 +20,7 @@ namespace nos::mediaio
 {
 struct InterlaceNode : NodeContext
 {
-	nosTextureFieldType Field = NOS_TEXTURE_FIELD_TYPE_EVEN;
+	nosTextureFieldType Field;
 
 	InterlaceNode(nosFbNode const* node)
 		: NodeContext(node)
@@ -36,6 +36,11 @@ struct InterlaceNode : NodeContext
 		vkss::SetFieldType(copyInfo->ID, *copyInfo->PinData, Field);
 		Field = vkss::FlippedField(Field);
 		return NOS_RESULT_SUCCESS;
+	}
+
+	void OnPathStart() override
+	{
+		Field = NOS_TEXTURE_FIELD_TYPE_EVEN;
 	}
 
 	virtual nosResult ExecuteNode(nosNodeExecuteParams* params)
