@@ -76,6 +76,37 @@ struct InterlaceNode : NodeContext
 	}
 };
 
+struct FieldJugglerNode : NodeContext
+{
+	nosTextureFieldType Field;
+
+	FieldJugglerNode(nosFbNode const* node)
+		: NodeContext(node)
+	{
+	}
+
+	void OnPathStart() override
+	{
+		Field = NOS_TEXTURE_FIELD_TYPE_EVEN;
+	}
+
+	virtual nosResult ExecuteNode(nosNodeExecuteParams* params)
+	{
+		auto values = GetPinValues(params);
+		bool isInterlaced = *GetPinValue<bool>(values, NOS_NAME("IsInterlaced"));
+		if (!isInterlaced)
+		{
+			Field = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
+		}
+		else
+		{
+			Field = vkss::FlippedField(Field);
+		}
+		SetPinValue(NOS_NAME("FieldType"), nos::Buffer::From((sys::vulkan::FieldType)Field));
+		return NOS_RESULT_SUCCESS;
+	}
+};
+
 struct DeinterlaceNode : NodeContext
 {
 	DeinterlaceNode(nosFbNode const* node)
@@ -165,6 +196,12 @@ nosResult RegisterDeinterlace(nosNodeFunctions* nodeFunctions)
 		.Shader = NSN_MediaIO_Deinterlace_Fragment_Shader,
 		.MultiSample = 1,};
 	return nosVulkan->RegisterPasses(1, &pass);
+}
+
+nosResult RegisterFieldJuggler(nosNodeFunctions* nodeFunctions)
+{
+	NOS_BIND_NODE_CLASS(NOS_NAME("FieldJuggler"), FieldJugglerNode, nodeFunctions);
+	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::MediaIO

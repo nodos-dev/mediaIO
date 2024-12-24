@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.mediaio",
-			"version": "2.2.1"
+			"version": "2.3.1"
 		},
 		"description": "Media I/O nodes.",
 		"display_name": "Media I/O",
@@ -18,7 +18,9 @@
 		"Config/Interlace.nosdef",
 		"Config/Conversions.nosdef",
 		"Config/TextureFormatConverter.nosdef",
-		"Config/IsInterlaced.nosdef"
+		"Config/IsInterlaced.nosdef",
+		"Config/FieldJuggler.nosdef",
+		"Config/SetBufferFieldType.nosdef"
 	],
 	"custom_types": [
 		"Config/Conversion.fbs"
@@ -37,6 +39,16 @@
 			"category": "Media IO",
 			"class_name": "Deinterlace",
 			"display_name": "Deinterlace"
+		},
+		{
+			"category": "Media IO",
+			"class_name": "FieldJuggler",
+			"display_name": "Field Juggler"
+		},
+		{
+			"category": "Media IO",
+			"class_name": "SetBufferFieldType",
+			"display_name": "Set Field Type (Buffer)"
 		},
 		{
 			"category": "Media IO|Conversions",
