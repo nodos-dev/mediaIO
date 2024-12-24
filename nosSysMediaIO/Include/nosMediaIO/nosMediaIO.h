@@ -165,6 +165,15 @@ typedef struct nosMediaIOVideoScanTypeList {
 	nosMediaIOVideoScanType ScanTypes[2];
 } nosMediaIOVideoScanTypeList;
 
+typedef enum nosMediaIOInterlacedFieldType
+{
+	NOS_MEDIAIO_INTERLACED_FIELD_TYPE_INVALID,
+	NOS_MEDIAIO_INTERLACED_FIELD_TYPE_MIN = NOS_MEDIAIO_INTERLACED_FIELD_TYPE_INVALID,
+	NOS_MEDIAIO_INTERLACED_EVEN_FIELD,
+	NOS_MEDIAIO_INTERLACED_ODD_FIELD,
+	NOS_MEDIAIO_INTERLACED_FIELD_TYPE_MAX = NOS_MEDIAIO_INTERLACED_ODD_FIELD
+} nosMediaIOInterlacedFieldType;
+
 typedef struct nosMediaIOSubsystem {
 	const char* (NOSAPI_CALL* GetFrameGeometryName)(nosMediaIOFrameGeometry geometry);
 	const char* (NOSAPI_CALL* GetFrameRateName)(nosMediaIOFrameRate frameRate);
