@@ -1,6 +1,6 @@
 # Media IO Plugin for Nodos
 
-![build-badge](https://github.com/nodos-dev/mediaio/actions/workflows/release.yml/badge.svg)
+![build-badge](https://github.com/nodos-dev/mediaio/actions/workflows/build.yml/badge.svg)
 
 This folder contains the Nodos plugin & subsystem for media I/O workflows. It delivers the core functionality for other video I/O devices such as AJA, Bluefish, webcam and other future video development.
 
