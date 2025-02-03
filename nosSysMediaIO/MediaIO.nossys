@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.sys.mediaio",
-			"version": "0.2.0"
+			"version": "0.3.0"
 		},
 		"description": "Subsystem for Media I/O workflows.",
 		"display_name": "Media I/O",
