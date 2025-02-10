@@ -8,6 +8,7 @@ if (NOT WITH_NODOS_WORKSPACE)
     message(FATAL_ERROR "This repo currently does not support builds without Nodos workspace. "
     "Place this repo under nodos-workspace/Module folder and run cmake -S ./Toolchain/CMake -B Build from workspace root.")
 endif()
+add_compile_definitions(NOS_DISABLE_DEPRECATED)
 
 nos_find_sdk("1.3.0" NOS_PLUGIN_SDK_TARGET NOS_SUBSYSTEM_SDK_TARGET NOS_SDK_DIR)
 cmake_path(SET FLATC_EXECUTABLE "${NOS_SDK_DIR}/bin/flatc")
