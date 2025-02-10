@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.mediaio",
-			"version": "2.4.0"
+			"version": "2.5.0"
 		},
 		"description": "Media I/O nodes.",
 		"display_name": "Media I/O",
@@ -20,7 +20,8 @@
 		"Config/TextureFormatConverter.nosdef",
 		"Config/IsInterlaced.nosdef",
 		"Config/FieldJuggler.nosdef",
-		"Config/SetBufferFieldType.nosdef"
+		"Config/SetBufferFieldType.nosdef",
+		"Config/GetLumaCoeffs.nosdef"
 	],
 	"custom_types": [
 		"Config/Conversion.fbs"
@@ -74,6 +75,12 @@
 			"category": "Media IO|Conversions",
 			"class_name": "ColorSpaceMatrix",
 			"display_name": "Color Space"
+		},
+		{
+			"category": "Media IO|Conversions",
+			"class_name": "GetLumaCoeffs",
+			"display_name": "Get Luma Coefficients",
+			"name_aliases": ["luma coefficients", "rec709", "rec601", "rec2020", "color space"]
 		},
 		{
 			"category": "Media IO",
