@@ -227,20 +227,16 @@ nosResult RegisterYUVBufferSizeCalculator(nosNodeFunctions* funcs)
 
 struct GammaLUTNodeContext : NodeContext
 {
-	nosResourceShareInfo StagingBuffer{};
+	vkss::Resource StagingBuffer;
 	static constexpr auto SSBO_SIZE = 10; // Can have a better name.
-	GammaLUTNodeContext(nosFbNodePtr node) : NodeContext(node)
+	GammaLUTNodeContext(nosFbNodePtr node)
+		: NodeContext(node), StagingBuffer(*vkss::Resource::Create(
+								 {.Info = {.Type = NOS_RESOURCE_TYPE_BUFFER,
+										   .Buffer = {.Size = (1 << (SSBO_SIZE)) * sizeof(uint16_t),
+													  .Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC),
+													  .MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE}}},
+								 "GammaLUT Staging Buffer"))
 	{
-		StagingBuffer.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
-		StagingBuffer.Info.Buffer.Size = (1 << (SSBO_SIZE)) * sizeof(uint16_t);
-		StagingBuffer.Info.Buffer.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC);
-		StagingBuffer.Info.Buffer.MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE;
-		nosVulkan->CreateResource(&StagingBuffer);
-	}
-
-	~GammaLUTNodeContext()
-	{
-		nosVulkan->DestroyResource(&StagingBuffer);
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override

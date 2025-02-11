@@ -3,7 +3,7 @@
 
 #include <nosMediaIO/nosMediaIO.h>
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(0); // APITransition: Reminder that this should be reset after next major!
+NOS_INIT();
 
 NOS_BEGIN_IMPORT_DEPS()
 NOS_END_IMPORT_DEPS()
