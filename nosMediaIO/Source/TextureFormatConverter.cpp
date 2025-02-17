@@ -20,7 +20,7 @@ NOS_REGISTER_NAME(DST_TEXTURE_INT8)
 
 std::pair<nos::Name, std::vector<uint8_t>> FloatToIntFormatShader;
 
-inline void CreateStringList(nosUUID& GenUUID, nosUUID& NodeUUID, std::string name, std::vector<std::string> list) {
+inline void CreateStringList(uuid& GenUUID, uuid& NodeUUID, std::string name, std::vector<std::string> list) {
 	flatbuffers::FlatBufferBuilder fbb;
 	flatbuffers::FlatBufferBuilder fbb2;
 	std::vector<flatbuffers::Offset<nos::fb::Pin>> StrListPin;
@@ -48,14 +48,15 @@ inline void CreateStringList(nosUUID& GenUUID, nosUUID& NodeUUID, std::string na
 
 struct TextureFormatConverter : nos::NodeContext
 {
-	nosResourceShareInfo InputTexture = {}, OutputTexture = {};
-	nosUUID NodeUUID = {}, InputUUID = {}, OutputUUID = {}, FormatUUID = {};
+	nosResourceShareInfo InputTexture = {};
+	std::optional<vkss::Resource> OutputTexture = std::nullopt;
+	uuid NodeUUID = {}, InputUUID = {}, OutputUUID = {}, FormatUUID = {};
 	nos::sys::vulkan::Format OutputFormat = {};
 	nosResourceShareInfo outBuf = {};
 	nosResourceShareInfo inBuf = {};
 
 	bool IsSavedNode = false;
-	TextureFormatConverter(nosFbNode const* node) : NodeContext(node)
+	TextureFormatConverter(nosFbNodePtr node) : NodeContext(node)
 	{
 		NodeUUID = *node->id();
 
@@ -98,11 +99,7 @@ struct TextureFormatConverter : nos::NodeContext
 		}
 	}
 
-	~TextureFormatConverter() {
-		nosVulkan->DestroyResource(&OutputTexture);
-	}
-
-	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
+	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
 	{
 		if (InputUUID == pinId) {
 			InputTexture = nos::vkss::DeserializeTextureInfo(value.Data);
@@ -189,7 +186,7 @@ struct TextureFormatConverter : nos::NodeContext
 					.AssociatedNodeId = NodeId,
 					.OutCmdHandle = &cmdRunPass
 				};
-				nosVulkan->Begin2(&beginParams);
+				nosVulkan->Begin(&beginParams);
 				nosRunComputePassParams pass = {};
 				nosCmdEndParams endParams = {};
 				pass.Key = NSN_FloatToIntFormat_Pass;
@@ -209,7 +206,7 @@ struct TextureFormatConverter : nos::NodeContext
 				.OutCmdHandle = &cmd,
 			};
 			nosCmdEndParams endParams = {};
-			nosVulkan->Begin2(&beginParams);
+			nosVulkan->Begin(&beginParams);
 			nosVulkan->Copy(cmd, &InputTexture, &Out, nullptr);
 			nosVulkan->End(cmd, &endParams);
 		}
@@ -227,33 +224,27 @@ struct TextureFormatConverter : nos::NodeContext
 	}
 
 	void PrepareResources() {
-		if(OutputTexture.Info.Texture.Width == InputTexture.Info.Texture.Width && OutputTexture.Info.Texture.Height == InputTexture.Info.Texture.Height
-			&& OutputTexture.Info.Texture.Format == nosFormat((int)OutputFormat) ) {
-			//No change
-			return;
+
+		if (OutputTexture && OutputTexture->Info.Texture.Width == InputTexture.Info.Texture.Width &&
+				OutputTexture->Info.Texture.Height == InputTexture.Info.Texture.Height &&
+				OutputTexture->Info.Texture.Format == nosFormat((int)OutputFormat))
+		{
+				return;
 		}
-		if (OutputTexture.Memory.Handle != NULL) {
-			nosVulkan->DestroyResource(&OutputTexture);
-		}
 
-		OutputTexture.Info.Type = NOS_RESOURCE_TYPE_TEXTURE;
-		OutputTexture.Info.Texture.FieldType = InputTexture.Info.Texture.FieldType;
-		OutputTexture.Info.Texture.Filter = InputTexture.Info.Texture.Filter;
-		OutputTexture.Info.Texture.Format = nosFormat((int)OutputFormat);
-		OutputTexture.Info.Texture.Height = InputTexture.Info.Texture.Height;
-		OutputTexture.Info.Texture.Usage = InputTexture.Info.Texture.Usage;
-		OutputTexture.Info.Texture.Width = InputTexture.Info.Texture.Width;
+		OutputTexture = {};
+		nosTextureInfo outputInfo = {};
 
-		nosVulkan->CreateResource(&OutputTexture);
-		UpdateOutputPin();
-	}
+		outputInfo.FieldType = InputTexture.Info.Texture.FieldType;
+		outputInfo.Filter = InputTexture.Info.Texture.Filter;
+		outputInfo.Format = nosFormat((int)OutputFormat);
+		outputInfo.Height = InputTexture.Info.Texture.Height;
+		outputInfo.Usage = InputTexture.Info.Texture.Usage;
+		outputInfo.Width = InputTexture.Info.Texture.Width;
 
-	void UpdateOutputPin() {
-		auto TTexture = nos::vkss::ConvertTextureInfo(OutputTexture);
-		flatbuffers::FlatBufferBuilder fbb;
-		auto TextureTable = nos::sys::vulkan::Texture::Pack(fbb, &TTexture);
-		fbb.Finish(TextureTable);
-		nosEngine.SetPinValueDirect(OutputUUID, { .Data = fbb.GetBufferPointer(), .Size = fbb.GetSize() });
+		OutputTexture = vkss::Resource::Create(outputInfo, "TextureFormatConverter Output Texture");
+		if (OutputTexture)
+			nosEngine.SetPinValue(OutputUUID, OutputTexture->ToPinData());
 	}
 };
 
@@ -263,12 +254,12 @@ nosResult RegisterTextureFormatConverter(nosNodeFunctions* fn)
 
 	std::filesystem::path root = nosEngine.Module->RootFolderPath;
 	auto shaderPath = (root / "Shaders" / "FloatToInt.comp").generic_string();
-	nosShaderInfo2 FloatToIntShaderInfo = {
-		.Key = NSN_FloatToIntFormat,
+	nosShaderInfo FloatToIntShaderInfo = {
+		.ShaderName = NSN_FloatToIntFormat,
 		.Source = {.Stage = NOS_SHADER_STAGE_COMP, .GLSLPath = shaderPath.c_str()},
-		.AssociatedNodeClassName = NOS_NAME("nos.mediaio.TextureFormatConverter")
+		.AssociatedNodeClassName = NSN_TextureFormatConverter
 	};
-	nosResult ret = nosVulkan->RegisterShaders2(1, &FloatToIntShaderInfo);
+	nosResult ret = nosVulkan->RegisterShaders(1, &FloatToIntShaderInfo);
 	if (NOS_RESULT_SUCCESS != ret)
 		return ret;
 

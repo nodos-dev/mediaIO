@@ -76,7 +76,7 @@ nosVec2u GetYCbCrBufferResolution(nosVec2u res, YCbCrPixelFormat fmt, bool inter
 
 struct RGB2YCbCrNodeContext : NodeContext
 {
-	RGB2YCbCrNodeContext(const nosFbNode* node) : NodeContext(node)
+	RGB2YCbCrNodeContext(nosFbNodePtr node) : NodeContext(node)
 	{
 	}
 
@@ -142,7 +142,7 @@ NOS_REGISTER_NAME(Resolution);
 
 struct YCbCr2RGBNodeContext : NodeContext
 {
-	YCbCr2RGBNodeContext(const nosFbNode* node) : NodeContext(node)
+	YCbCr2RGBNodeContext(nosFbNodePtr node) : NodeContext(node)
 	{
 		AddPinValueWatcher(NSN_Resolution, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldVal) {
 			auto newDispatchSize = nosVec2u(120, 120);
@@ -201,7 +201,7 @@ nosResult RegisterYCbCr2RGB(nosNodeFunctions* funcs)
 
 struct YUVBufferSizeCalculator : NodeContext
 {
-	YUVBufferSizeCalculator(const nosFbNode* node) : NodeContext(node)
+	YUVBufferSizeCalculator(nosFbNodePtr node) : NodeContext(node)
 	{
 	}
 
@@ -227,20 +227,16 @@ nosResult RegisterYUVBufferSizeCalculator(nosNodeFunctions* funcs)
 
 struct GammaLUTNodeContext : NodeContext
 {
-	nosResourceShareInfo StagingBuffer{};
+	vkss::Resource StagingBuffer;
 	static constexpr auto SSBO_SIZE = 10; // Can have a better name.
-	GammaLUTNodeContext(const nosFbNode* node) : NodeContext(node)
+	GammaLUTNodeContext(nosFbNodePtr node)
+		: NodeContext(node), StagingBuffer(*vkss::Resource::Create(
+								 {.Info = {.Type = NOS_RESOURCE_TYPE_BUFFER,
+										   .Buffer = {.Size = (1 << (SSBO_SIZE)) * sizeof(uint16_t),
+													  .Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC),
+													  .MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE}}},
+								 "GammaLUT Staging Buffer"))
 	{
-		StagingBuffer.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
-		StagingBuffer.Info.Buffer.Size = (1 << (SSBO_SIZE)) * sizeof(uint16_t);
-		StagingBuffer.Info.Buffer.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC);
-		StagingBuffer.Info.Buffer.MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE;
-		nosVulkan->CreateResource(&StagingBuffer);
-	}
-
-	~GammaLUTNodeContext()
-	{
-		nosVulkan->DestroyResource(&StagingBuffer);
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
@@ -269,8 +265,7 @@ struct GammaLUTNodeContext : NodeContext
 		nosEngine.LogI("GammaLUT: Buffer updated");
 		Curve = curve;
 		Type = dir;
-		nosCmd cmd;
-		nosVulkan->Begin("GammaLUT Staging Copy", &cmd);
+		nosCmd cmd = vkss::BeginCmd(NOS_NAME("GammaLUT Staging Copy"), NodeId);
 		nosVulkan->Copy(cmd, &StagingBuffer, &OutputBuffer, 0);
 		nosVulkan->End(cmd, nullptr);
 		return NOS_RESULT_SUCCESS;
@@ -375,7 +370,7 @@ struct ColorSpaceMatrixNodeContext : NodeContext
 			glm::vec<4, T>(0, 0, 0, 1)));
 	}
 
-	ColorSpaceMatrixNodeContext(const nosFbNode* node) : NodeContext(node)
+	ColorSpaceMatrixNodeContext(nosFbNodePtr node) : NodeContext(node)
 	{
 
 	}
@@ -487,7 +482,7 @@ nosResult RegisterNV12ToRGBA(nosNodeFunctions* funcs)
 
 struct RGBA2BGR24BufferNodeContext : NodeContext
 {
-	RGBA2BGR24BufferNodeContext(const nosFbNode* node) : NodeContext(node)
+	RGBA2BGR24BufferNodeContext(nosFbNodePtr node) : NodeContext(node)
 	{
 	}
 
